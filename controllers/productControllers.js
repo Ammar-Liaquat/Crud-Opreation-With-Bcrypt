@@ -99,10 +99,11 @@ const deleteproduct = async (req, res) => {
   }
 };
 
+
 module.exports = {
   createproduct,
   getproduct,
   getallproduct,
   editproduct,
-  deleteproduct
+  deleteproduct,
 };
