@@ -8,6 +8,7 @@ const {
   deleteuser,
   refresht,
   verifyotp,
+  resendOtp,
 } = require("../controllers/userControlles");
 const routes = express.Router();
 routes.use(express.json());
@@ -19,5 +20,6 @@ routes.get("/user",getuser);
 routes.delete("/user/:id", deleteuser);
 routes.post("/refresh",middleware, refresht);
 routes.post("/otp", verifyotp);
+routes.post("/reotp", resendOtp);
 
 module.exports = routes;

@@ -14,11 +14,13 @@ const userSchema = mongoose.Schema(
     refreshtoken: {
       type: String,
     },
-    otp:Number,
-    isVerify:{
-      type:Boolean,
-      default:false
-    }
+    otp: Number,
+
+    isVerify: {
+      type: Boolean,
+      default: false,
+    },
+    otpExpiry: Number,
   },
   { timestamps: true },
 );

@@ -8,9 +8,9 @@ const createuser = async (req, res) => {
     const { email, password } = req.body;
     let user = await User.findOne({ email });
     if (user)
-      return res.status(409).json({
+      return res.status(400).json({
         message: "email already exist",
-        code: 409,
+        code: 400,
       });
     const salt = await bcrypt.genSalt(12);
     const hashpassword = await bcrypt.hash(password, salt);
@@ -22,9 +22,8 @@ const createuser = async (req, res) => {
       password: hashpassword,
       otp: generateotp,
       isVerify: false,
-      otpExpiry: Date.now() + 5 * 6 * 1000,
+      otpExpiry: Date.now() + 1 * 60 * 1000,
     });
-
     const transport = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -35,13 +34,13 @@ const createuser = async (req, res) => {
 
     await transport.sendMail({
       from: process.env.NodeMail_ID,
-      to: "ammarliaquat1234@gmail.com",
+      to: user.email,
       subject: "Welcome to Ammar Company",
       text: ` your OTP code ${generateotp} valid for 5 minutes`,
     });
 
     res.status(200).json({
-      message: "otp is send to your email plz verify",
+      message: "Otp is send to your email plz verify",
     });
 
     const payload = {
@@ -93,6 +92,7 @@ const verifyotp = async (req, res) => {
       });
     user.isVerify = true;
     user.otp = null;
+    user.otpExpiry = null;
     await user.save();
 
     res.status(200).json({
@@ -108,6 +108,48 @@ const verifyotp = async (req, res) => {
   }
 };
 
+const resendOtp = async (req,res)=>{
+
+  try {
+    const {email} = req.body
+  const user = await User.findOne({email})
+  if(!user) return res.status(401).json({
+    message:"user not exist",
+    code:401,
+  })
+      if (user.isVerify)
+      return res.status(400).json({ message: "User already verified" });
+  const generateotp = Math.floor(100000 + Math.random() * 900000);
+
+   const transport = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.NodeMail_ID,
+        pass: process.env.NodeMailPassword,
+      },
+    });
+
+    await transport.sendMail({
+      from: process.env.NodeMail_ID,
+      to: user.email,
+      subject: "Resend OTP",
+      text: ` your OTP code ${generateotp} valid for 5 minutes`,
+    });
+    user.otp = generateotp
+    user.otpExpiry = Date.now() + 5 * 60 * 1000;
+  await user.save()
+    res.status(200).json({
+      message: "OTP resent succesfully",
+    });
+
+  } catch (error) {
+   res.status(500).json({
+    message:"internal server error",
+    code:500,
+    error:error.message
+   }) 
+  }
+}
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -240,9 +282,9 @@ const deleteuser = async (req, res) => {
     const user = await User.findByIdAndDelete(req.params.id);
 
     if (!user) {
-      return res.status(404).json({
+      return res.status(401).json({
         message: "User not found",
-        code: 404,
+        code: 401,
       });
     }
     res.status(200).json({
@@ -262,6 +304,7 @@ const deleteuser = async (req, res) => {
 module.exports = {
   createuser,
   verifyotp,
+  resendOtp,
   login,
   editpassword,
   getuser,
