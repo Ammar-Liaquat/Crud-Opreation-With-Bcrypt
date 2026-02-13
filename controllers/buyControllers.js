@@ -34,7 +34,6 @@ const buyproduct = async (req, res) => {
       product.stock -= quantity;
       await product.save();
       orders.push(order)
-      
     }
     res.status(200).json({
       message: "product buy successfully",

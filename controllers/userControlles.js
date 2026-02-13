@@ -19,10 +19,12 @@ const createuser = async (req, res) => {
 
     user = await User.create({
       email,
+      
       password: hashpassword,
       otp: generateotp,
       isVerify: false,
       otpExpiry: Date.now() + 5 * 60 * 1000,
+      avatar:req.file.path
     });
     const transport = nodemailer.createTransport({
       service: "gmail",
@@ -151,7 +153,7 @@ const resendOtp = async (req,res)=>{
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    let user = await User.findOne({ email });
+    let user = await User.findOne({ email }).select("+password +refreshtoken",);
     if (!user)
       return res.status(401).json({
         message: "email not exsit",
@@ -163,7 +165,6 @@ const login = async (req, res) => {
       return res.status(401).json({
         message: "invalid password",
         code: 401,
-        password: compare,
       });
     if (!user.isVerify)
       return res.status(200).json({
@@ -179,12 +180,16 @@ const login = async (req, res) => {
     const refreshtoken = jwt.sign(payload, process.env.SECRET_KEY, {
       expiresIn: "7d",
     });
+
+    user = user.toObject()
+    delete user.password,
+    delete user.refreshtoken,
+    delete user.__v
     res.status(200).json({
       message: "login succesfully",
       code: 200,
       data: user,
       accesstoken: accesstoken,
-      refreshtoken: refreshtoken,
     });
   } catch (error) {
     res.status(500).json({

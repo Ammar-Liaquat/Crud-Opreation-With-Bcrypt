@@ -10,15 +10,22 @@ const userSchema = mongoose.Schema(
     password: {
       type: String,
       required: true,
+      select:false
     },
     refreshtoken: {
       type: String,
+      select:false
+    },
+    avatar: {
+      type:String,
+      required:true,
     },
     otp: Number,
 
     isVerify: {
       type: Boolean,
       default: false,
+
     },
     otpExpiry: Number,
   },

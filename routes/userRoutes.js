@@ -1,5 +1,6 @@
 const express = require("express");
 const middleware = require("../middelware/Auth")
+const upload = require("../middelware/multer")
 const {
   createuser,
   login,
@@ -13,7 +14,7 @@ const {
 const routes = express.Router();
 routes.use(express.json());
 
-routes.post("/user", createuser);
+routes.post("/user", upload.single("image"), createuser);
 routes.post("/login", login);
 routes.post("/user/:id", editpassword);
 routes.get("/user",getuser);
