@@ -19,7 +19,6 @@ const createuser = async (req, res) => {
 
     user = await User.create({
       email,
-      
       password: hashpassword,
       otp: generateotp,
       isVerify: false,
