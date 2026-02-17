@@ -1,3 +1,4 @@
+const productModels = require("../models/productModels");
 const Product = require("../models/productModels");
 
 const createproduct = async (req, res) => {
@@ -45,10 +46,22 @@ const getproduct = async (req, res) => {
 const getallproduct = async (req, res) => {
   try {
     const product = await Product.find();
+
+    let page = Number(req.query.page) || 1
+    let limit = Number(req.query.limit) || 3
+
+    let startIndex = (page - 1) * limit
+    let endIndex = page * limit
+
+    let results = product.slice(startIndex,endIndex)
+    
     res.status(200).json({
       message: "all product fetched succesfully",
       code: 200,
-      data: product,
+      page,
+      limit,
+      total: product.length,
+      data:results
     });
   } catch (error) {
     res.status(200).json({
