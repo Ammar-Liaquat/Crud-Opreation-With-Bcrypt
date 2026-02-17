@@ -1,4 +1,3 @@
-const productModels = require("../models/productModels");
 const Product = require("../models/productModels");
 
 const createproduct = async (req, res) => {
@@ -44,33 +43,32 @@ const getproduct = async (req, res) => {
 };
 
 const getallproduct = async (req, res) => {
-  try {
-    const product = await Product.find();
 
+  try {
     let page = Number(req.query.page) || 1
     let limit = Number(req.query.limit) || 3
 
-    let startIndex = (page - 1) * limit
-    let endIndex = page * limit
+    let skip = (page - 1) * limit
 
-    let results = product.slice(startIndex,endIndex)
-    
+    let products = await Product.find().skip(skip).limit(limit)
+
+    let total = await Product.countDocuments()
     res.status(200).json({
-      message: "all product fetched succesfully",
-      code: 200,
+      message:"all product fetched",
+      code:200,
       page,
       limit,
-      total: product.length,
-      data:results
-    });
+      total,
+      data:products
+    })
   } catch (error) {
-    res.status(200).json({
-      message: "Internal server error",
-      code: 200,
-      error: error.message,
-    });
+    res.status(500).json({
+      message:"internal server error",
+      code:500,
+      error:error.message
+    })
   }
-};
+}
 const editproduct = async (req, res) => {
   try {
     const product = await Product.findByIdAndUpdate(
