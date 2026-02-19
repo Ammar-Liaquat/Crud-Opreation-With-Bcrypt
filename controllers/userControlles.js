@@ -160,7 +160,7 @@ const resendOtp = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    let user = await User.findOne({ email }).select("+password +refreshtoken");
+    let user = await User.findOne({ email }).select("+password");
     if (!user)
       return res.status(401).json({
         message: "email not exsit",
@@ -184,12 +184,10 @@ const login = async (req, res) => {
     const accesstoken = jwt.sign(payload, process.env.SECRET_KEY, {
       expiresIn: "1d",
     });
-    const refreshtoken = jwt.sign(payload, process.env.SECRET_KEY, {
-      expiresIn: "7d",
-    });
+ 
 
     user = user.toObject();
-    (delete user.password, delete user.refreshtoken, delete user.__v);
+    (delete user.password, delete user.__v);
     res.status(200).json({
       message: "login succesfully",
       code: 200,

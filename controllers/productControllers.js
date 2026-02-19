@@ -53,14 +53,20 @@ const getallproduct = async (req, res) => {
     let products = await Product.find().skip(skip).limit(limit)
 
     let total = await Product.countDocuments()
-    res.status(200).json({
-      message:"all product fetched",
-      code:200,
-      page,
-      limit,
-      total,
-      data:products
-    })
+    let totalPages = Math.ceil(total / limit)
+
+ res.status(200).json({
+  success: true,
+  message: "Products fetched",
+  data: products,
+  pagination: {
+    page,
+    limit,
+    total,
+    totalPages
+  }
+});
+
   } catch (error) {
     res.status(500).json({
       message:"internal server error",
